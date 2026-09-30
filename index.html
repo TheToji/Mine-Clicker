@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miner Clicker</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 1250px;
+            width: 100%;
+            height: 92vh;
+        }
+        /* ÜST PANEL: Envanter */
+        #top-inventory {
+            background: #1e1e1e;
+            border: 3px solid #333;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .inv-item {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        #main-layout {
+            display: flex;
+            gap: 20px;
+            flex: 1;
+            overflow: hidden;
+        }
+        .panel {
+            background: #1e1e1e;
+            border: 3px solid #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            flex: 1;
+            overflow-y: auto;
+        }
+        #center-panel {
+            flex: 1.2;
+            text-align: center;
+            overflow-y: visible;
+        }
+        #mine-btn {
+            background-color: #f39c12;
+            color: #000;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 15px 0;
+            transition: transform 0.1s;
+        }
+        #mine-btn:active {
+            transform: scale(0.95);
+        }
+        .stats {
+            font-size: 13px;
+            margin: 8px 0;
+            text-align: left;
+            line-height: 1.4;
+        }
+        .section-title {
+            color: #f1c40f;
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 1px dashed #444;
+            padding-bottom: 5px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            background: #1e1e1e;
+            padding-top: 5px;
+            z-index: 2;
+        }
+        .action-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 7px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            margin-top: 5px;
+            font-weight: bold;
+            width: 100%;
+            font-size: 11px;
+        }
+        .action-btn:hover {
+            background-color: #2ecc71;
+        }
+        .hidden-trade {
+            display: none;
+        }
+        .trade-group {
+            margin-bottom: 12px;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 8px;
+        }
+        /* Redeem Alanı Stili */
+        #redeem-section {
+            margin-top: 15px;
+            background: #252525;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px dashed #444;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        #redeem-input {
+            width: 100%;
+            padding: 7px;
+            background: #121212;
+            border: 1px solid #444;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        #redeem-btn {
+            width: 100%;
+            padding: 8px;
+            background: #8e44ad;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 11px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #redeem-btn:hover {
+            background: #9b59b6;
+        }
+        #story-box {
+            margin-top: 10px;
+            font-style: italic;
+            color: #e74c3c;
+            min-height: 25px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- ÜST PANEL: Envanter -->
+        <div id="top-inventory">
+            <div class="inv-item layer-1-inv">💎 Mücevher: <span id="gems">0</span></div>
+            <div class="inv-item layer-1-inv">🪙 Altın: <span id="gold">0</span></div>
+            <div class="inv-item layer-1-inv">🟩 Zümrüt: <span id="emerald">0</span></div>
+            <div class="inv-item layer-1-inv">🔥 Magma: <span id="magma">0</span></div>
+            <div class="inv-item layer-1-inv">💠 Elmas: <span id="diamond">0</span></div>
+            <div class="inv-item layer-1-inv">🔮 Prizma: <span id="prism">0</span></div>
+            <div class="inv-item layer-1-inv">🌌 Çekirdek: <span id="core">0</span></div>
+
+            <div class="inv-item layer-2-inv hidden-trade">⚛️ Nükleer Küre: <span id="nuclear">0</span></div>
+            <div class="inv-item layer-2-inv hidden-trade">⚡ Elektrik Küresi: <span id="electric">0</span></div>
+            <div class="inv-item layer-2-inv hidden-trade">🌌 Yerçekimsiz M.: <span id="zero-gravity">0</span></div>
+            <div class="inv-item layer-2-inv hidden-trade">⚛️ Atom: <span id="atom">0</span></div>
+            <div class="inv-item layer-2-inv hidden-trade">⬜ Beyaz Madde: <span id="white-matter">0</span></div>
+            <div class="inv-item layer-2-inv hidden-trade">⬛ Karanlık Madde: <span id="dark-matter">0</span></div>
+        </div>
+
+        <div id="main-layout">
+            <!-- SOL PANEL: Kazma İstatistikleri -->
+            <div class="panel" id="left-panel">
+                <div class="section-title">KAZMA İSTATİSTİKLERİ</div>
+                <div class="stats">🛠️ Katman: <br><span id="layer-name" style="color: #f1c40f; font-weight: bold;">Katman 1</span></div>
+                <div class="stats">🛠️ Seviye: <br><span id="tier-name" style="color: #3498db; font-weight: bold;">Mücevher</span></div>
+                <hr style="border-color: #333; margin: 10px 0;">
+                
+                <div class="stats" style="color: #f39c12; font-weight: bold;">Tıklama Başına Üretim:</div>
+                <div class="stats layer-1-rates">💎 Mücevher: <span id="rate-gems">1</span></div>
+                <div class="stats layer-1-rates">🪙 Altın: <span id="rate-gold">0</span></div>
+                <div class="stats layer-1-rates">🟩 Zümrüt: <span id="rate-emerald">0</span></div>
+                <div class="stats layer-1-rates">🔥 Magma: <span id="rate-magma">0</span></div>
+                <div class="stats layer-1-rates">💠 Elmas: <span id="rate-diamond">0</span></div>
+                <div class="stats layer-1-rates">🔮 Prizma: <span id="rate-prism">0</span></div>
+                <div class="stats layer-1-rates">🌌 Çekirdek: <span id="rate-core">0</span></div>
+
+                <div class="stats layer-2-rates hidden-trade">⚛️ Nükleer Küre: <span id="rate-nuclear">1</span></div>
+                <div class="stats layer-2-rates hidden-trade">⚡ Elektrik Küresi: <span id="rate-electric">0</span></div>
+                <div class="stats layer-2-rates hidden-trade">🌌 Yerçekimsiz M.: <span id="rate-zero-gravity">0</span></div>
+                <div class="stats layer-2-rates hidden-trade">⚛️ Atom: <span id="rate-atom">0</span></div>
+                <div class="stats layer-2-rates hidden-trade">⬜ Beyaz Madde: <span id="rate-white-matter">0</span></div>
+                <div class="stats layer-2-rates hidden-trade">⬛ Karanlık Madde: <span id="rate-dark-matter">0</span></div>
+
+                <hr style="border-color: #333; margin: 10px 0;">
+                <div class="stats">🖱️ Toplam Tıklama: <span id="total-clicks">0</span></div>
+                <div class="stats">💸 Harcanan Para: <span id="total-spent">0</span> <span id="currency-name">Müv.</span></div>
+            </div>
+
+            <!-- ORTA PANEL: Aksiyon ve Seviye -->
+            <div class="panel" id="center-panel">
+                <h1 id="game-title">⛏️ Miner Clicker</h1>
+                <div style="font-size: 15px; margin-bottom: 10px;">Kazma Gücü: <span id="power-display" style="color: #e67e22; font-weight: bold;">1</span></div>
+
+                <button id="mine-btn">KAZ!</button>
+
+                <div class="section-title" style="margin-top:10px; position:static;">YÜKSELTMELER</div>
+                <button class="action-btn" id="upgrade-click" style="background:#2980b9; padding: 10px; font-size: 12px;">Kazma Gücünü Artır (<span id="upgrade-cost">10</span> <span id="upgrade-unit">Müv.</span>)</button>
+
+                <!-- Redeem (Kupon Kodu) Alanı -->
+                <div id="redeem-section">
+                    <div style="font-size: 11px; color: #aaa; text-align: left;">Kupon Kodu Kullan</div>
+                    <input type="text" id="redeem-input" placeholder="Kod yaz...">
+                    <button id="redeem-btn" onclick="useRedeemCode()">Kullan</button>
+                </div>
+
+                <div id="story-box"></div>
+            </div>
+
+            <!-- SAĞ PANEL: Kaydırılabilir Küresel Borsa -->
+            <div class="panel" id="right-panel">
+                <div class="section-title">KÜRESEL BORSA</div>
+                
+                <!-- KATMAN 1 BORSA -->
+                <div id="layer-1-market">
+                    <div class="trade-group">
+                        <div style="font-size:12px; color:#3498db; font-weight:bold;">Mücevher Piyasası</div>
+                        <button class="action-btn" style="background:#3498db;" onclick="convert('gems', 'gold', 10000, 1)">10.000 Müv. -> 1 Altın</button>
+                        <button id="gem-em-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('gems', 'emerald', 100000, 1)">100.000 Müv. -> 1 Zümrüt</button>
+                        <button id="gem-mg-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('gems', 'magma', 400000, 1)">400.000 Müv. -> 1 Magma</button>
+                        <button id="gem-dm-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('gems', 'diamond', 500000, 1)">500.000 Müv. -> 1 Elmas</button>
+                        <button id="gem-pr-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('gems', 'prism', 1000000, 1)">1 Milyon Müv. -> 1 Prizma</button>
+                        <button id="gem-cr-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('gems', 'core', 50000000, 1)">50 Milyon Müv. -> 1 Çekirdek</button>
+                    </div>
+
+                    <div id="trade-gold-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#f39c12; font-weight:bold;">Altın Piyasası</div>
+                        <button class="action-btn" style="background:#d35400;" onclick="convert('gold', 'gems', 1, 10000)">1 Altın -> 10.000 Müv.</button>
+                        <button id="gold-em-trade" class="action-btn hidden-trade" style="background:#d35400;" onclick="convert('gold', 'emerald', 10, 1)">10 Altın -> 1 Zümrüt</button>
+                        <button id="gold-mg-trade" class="action-btn hidden-trade" style="background:#d35400;" onclick="convert('gold', 'magma', 40, 1)">40 Altın -> 1 Magma</button>
+                        <button id="gold-dm-trade" class="action-btn hidden-trade" style="background:#d35400;" onclick="convert('gold', 'diamond', 50, 1)">50 Altın -> 1 Elmas</button>
+                        <button id="gold-pr-trade" class="action-btn hidden-trade" style="background:#d35400;" onclick="convert('gold', 'prism', 100, 1)">100 Altın -> 1 Prizma</button>
+                        <button id="gold-cr-trade" class="action-btn hidden-trade" style="background:#d35400;" onclick="convert('gold', 'core', 5000, 1)">5000 Altın -> 1 Çekirdek</button>
+                    </div>
+
+                    <div id="trade-emerald-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#27ae60; font-weight:bold;">Zümrüt Piyasası</div>
+                        <button class="action-btn" style="background:#27ae60;" onclick="convert('emerald', 'gems', 1, 100000)">1 Zümrüt -> 100.000 Müv.</button>
+                        <button class="action-btn" style="background:#27ae60;" onclick="convert('emerald', 'gold', 1, 10)">1 Zümrüt -> 10 Altın</button>
+                        <button id="em-mg-trade" class="action-btn hidden-trade" style="background:#27ae60;" onclick="convert('emerald', 'magma', 4, 1)">4 Zümrüt -> 1 Magma</button>
+                        <button id="em-dm-trade" class="action-btn hidden-trade" style="background:#27ae60;" onclick="convert('emerald', 'diamond', 5, 1)">5 Zümrüt -> 1 Elmas</button>
+                        <button id="em-pr-trade" class="action-btn hidden-trade" style="background:#27ae60;" onclick="convert('emerald', 'prism', 10, 1)">10 Zümrüt -> 1 Prizma</button>
+                        <button id="em-cr-trade" class="action-btn hidden-trade" style="background:#27ae60;" onclick="convert('emerald', 'core', 50, 1)">50 Zümrüt -> 1 Çekirdek</button>
+                    </div>
+
+                    <div id="trade-magma-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#c0392b; font-weight:bold;">Magma Piyasası</div>
+                        <button class="action-btn" style="background:#c0392b;" onclick="convert('magma', 'gems', 1, 400000)">1 Magma -> 400.000 Müv.</button>
+                        <button class="action-btn" style="background:#c0392b;" onclick="convert('magma', 'gold', 1, 40)">1 Magma -> 40 Altın</button>
+                        <button class="action-btn" style="background:#c0392b;" onclick="convert('magma', 'emerald', 1, 4)">1 Magma -> 4 Zümrüt</button>
+                        <button id="mg-dm-trade" class="action-btn hidden-trade" style="background:#c0392b;" onclick="convert('magma', 'diamond', 5, 4)">5 Magma -> 4 Elmas</button>
+                        <button id="mg-pr-trade" class="action-btn hidden-trade" style="background:#c0392b;" onclick="convert('magma', 'prism', 10, 4)">10 Magma -> 4 Prizma</button>
+                        <button id="mg-cr-trade" class="action-btn hidden-trade" style="background:#c0392b;" onclick="convert('magma', 'core', 125, 1)">125 Magma -> 1 Çekirdek</button>
+                    </div>
+
+                    <div id="trade-diamond-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#2980b9; font-weight:bold;">Elmas Piyasası</div>
+                        <button class="action-btn" style="background:#2980b9;" onclick="convert('diamond', 'gems', 1, 500000)">1 Elmas -> 500.000 Müv.</button>
+                        <button class="action-btn" style="background:#2980b9;" onclick="convert('diamond', 'gold', 1, 50)">1 Elmas -> 50 Altın</button>
+                        <button class="action-btn" style="background:#2980b9;" onclick="convert('diamond', 'emerald', 1, 5)">1 Elmas -> 5 Zümrüt</button>
+                        <button class="action-btn" style="background:#2980b9;" onclick="convert('diamond', 'magma', 4, 5)">4 Elmas -> 5 Magma</button>
+                        <button id="dm-pr-trade" class="action-btn hidden-trade" style="background:#2980b9;" onclick="convert('diamond', 'prism', 2, 1)">2 Elmas -> 1 Prizma</button>
+                        <button id="dm-cr-trade" class="action-btn hidden-trade" style="background:#2980b9;" onclick="convert('diamond', 'core', 100, 1)">100 Elmas -> 1 Çekirdek</button>
+                    </div>
+
+                    <div id="trade-prism-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#8e44ad; font-weight:bold;">Prizma Piyasası</div>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('prism', 'gems', 1, 1000000)">1 Prizma -> 1 Milyon Müv.</button>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('prism', 'gold', 1, 100)">1 Prizma -> 100 Altın</button>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('prism', 'emerald', 1, 10)">1 Prizma -> 10 Zümrüt</button>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('prism', 'magma', 2, 5)">2 Prizma -> 5 Magma</button>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('prism', 'diamond', 1, 2)">1 Prizma -> 2 Elmas</button>
+                        <button id="pr-cr-trade" class="action-btn hidden-trade" style="background:#8e44ad;" onclick="convert('prism', 'core', 50, 1)">50 Prizma -> 1 Çekirdek</button>
+                    </div>
+
+                    <div id="trade-core-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#34495e; font-weight:bold;">Çekirdek Piyasası</div>
+                        <button class="action-btn" style="background:#34495e;" onclick="convert('core', 'gems', 1, 50000000)">1 Çekirdek -> 50 Milyon Müv.</button>
+                        <button class="action-btn" style="background:#34495e;" onclick="convert('core', 'gold', 1, 5000)">1 Çekirdek -> 5000 Altın</button>
+                        <button class="action-btn" style="background:#34495e;" onclick="convert('core', 'emerald', 1, 50)">1 Çekirdek -> 50 Zümrüt</button>
+                        <button class="action-btn" style="background:#34495e;" onclick="convert('core', 'magma', 1, 125)">1 Çekirdek -> 125 Magma</button>
+                        <button class="action-btn" style="background:#34495e;" onclick="convert('core', 'diamond', 1, 100)">1 Çekirdek -> 100 Elmas</button>
+                        <button class="action-btn" style="background:#34495e;" onclick="convert('core', 'prism', 1, 50)">1 Çekirdek -> 50 Prizma</button>
+                    </div>
+
+                    <div id="layer-2-trigger-box" style="margin-top: 15px; text-align: center;">
+                        <button id="to-layer-2-btn" class="action-btn hidden-trade" style="background: #e67e22; padding: 12px; font-size: 12px;" onclick="goToLayer2()">Borsa Katmanı 2'ye Geç!</button>
+                    </div>
+                </div>
+
+                <!-- KATMAN 2 BORSA -->
+                <div id="layer-2-market" class="hidden-trade">
+                    <div class="trade-group">
+                        <div style="font-size:12px; color:#3498db; font-weight:bold;">Nükleer Küre Piyasası</div>
+                        <button id="nuc-elec-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('nuclear', 'electric', 10000, 1)">10 bin Nükleer Küre -> 1 Elektrik Küresi</button>
+                        <button id="nuc-zg-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('nuclear', 'zeroGravity', 50000, 1)">50 bin Nükleer Küre -> 1 Yerçekimsiz Madde</button>
+                        <button id="nuc-atom-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('nuclear', 'atom', 150000, 1)">150 bin Nükleer Küre -> 1 Atom</button>
+                        <button id="nuc-wm-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('nuclear', 'whiteMatter', 300000, 1)">300 bin Nükleer Küre -> 1 Beyaz Madde</button>
+                        <button id="nuc-dm-trade" class="action-btn hidden-trade" style="background:#3498db;" onclick="convert('nuclear', 'darkMatter', 600000, 1)">600 bin Nükleer Küre -> 1 Karanlık Madde</button>
+                    </div>
+
+                    <div id="trade-electric-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#f39c12; font-weight:bold;">Elektrik Küresi Piyasası</div>
+                        <button class="action-btn" style="background:#d35400;" onclick="convert('electric', 'nuclear', 1, 10000)">1 Elektrik Küresi -> 10 bin Nükleer Küre</button>
+                        <button id="elec-zg-trade" class="action-btn hidden-trade" style="background:#d35400;" onclick="convert('electric', 'zeroGravity', 5, 1)">5 Elektrik Küresi -> 1 Yerçekimsiz Madde</button>
+                        <button id="elec-atom-trade" class="action-btn hidden-trade" style="background:#d35400;" onclick="convert('electric', 'atom', 15, 1)">15 Elektrik Küresi -> 1 Atom</button>
+                        <button id="elec-wm-trade" class="action-btn hidden-trade" style="background:#d35400;" onclick="convert('electric', 'whiteMatter', 30, 1)">30 Elektrik Küresi -> 1 Beyaz Madde</button>
+                        <button id="elec-dm-trade" class="action-btn hidden-trade" style="background:#d35400;" onclick="convert('electric', 'darkMatter', 60, 1)">60 Elektrik Küresi -> 1 Karanlık Madde</button>
+                    </div>
+
+                    <div id="trade-zg-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#27ae60; font-weight:bold;">Yerçekimsiz Madde Piyasası</div>
+                        <button class="action-btn" style="background:#27ae60;" onclick="convert('zeroGravity', 'nuclear', 1, 50000)">1 Yerçekimsiz Madde -> 50 bin Nükleer Küre</button>
+                        <button class="action-btn" style="background:#27ae60;" onclick="convert('zeroGravity', 'electric', 1, 5)">1 Yerçekimsiz Madde -> 5 Elektrik Küresi</button>
+                        <button id="zg-atom-trade" class="action-btn hidden-trade" style="background:#27ae60;" onclick="convert('zeroGravity', 'atom', 3, 1)">3 Yerçekimsiz Madde -> 1 Atom</button>
+                        <button id="zg-wm-trade" class="action-btn hidden-trade" style="background:#27ae60;" onclick="convert('zeroGravity', 'whiteMatter', 6, 1)">6 Yerçekimsiz Madde -> 1 Beyaz Madde</button>
+                        <button id="zg-dm-trade" class="action-btn hidden-trade" style="background:#27ae60;" onclick="convert('zeroGravity', 'darkMatter', 12, 1)">12 Yerçekimsiz Madde -> 1 Karanlık Madde</button>
+                    </div>
+
+                    <div id="trade-atom-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#c0392b; font-weight:bold;">Atom Piyasası</div>
+                        <button class="action-btn" style="background:#c0392b;" onclick="convert('atom', 'nuclear', 1, 150000)">1 Atom -> 150 bin Nükleer Küre</button>
+                        <button class="action-btn" style="background:#c0392b;" onclick="convert('atom', 'electric', 1, 15)">1 Atom -> 15 Elektrik Küresi</button>
+                        <button class="action-btn" style="background:#c0392b;" onclick="convert('atom', 'zeroGravity', 1, 3)">1 Atom -> 3 Yerçekimsiz Madde</button>
+                        <button id="atom-wm-trade" class="action-btn hidden-trade" style="background:#c0392b;" onclick="convert('atom', 'whiteMatter', 2, 1)">2 Atom -> 1 Beyaz Madde</button>
+                        <button id="atom-dm-trade" class="action-btn hidden-trade" style="background:#c0392b;" onclick="convert('atom', 'darkMatter', 4, 1)">4 Atom -> 1 Karanlık Madde</button>
+                    </div>
+
+                    <div id="trade-wm-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#2980b9; font-weight:bold;">Beyaz Madde Piyasası</div>
+                        <button class="action-btn" style="background:#2980b9;" onclick="convert('whiteMatter', 'nuclear', 1, 300000)">1 Beyaz Madde -> 300 bin Nükleer Küre</button>
+                        <button class="action-btn" style="background:#2980b9;" onclick="convert('whiteMatter', 'electric', 1, 30)">1 Beyaz Madde -> 30 Elektrik Küresi</button>
+                        <button class="action-btn" style="background:#2980b9;" onclick="convert('whiteMatter', 'zeroGravity', 1, 6)">1 Beyaz Madde -> 6 Yerçekimsiz Madde</button>
+                        <button class="action-btn" style="background:#2980b9;" onclick="convert('whiteMatter', 'atom', 1, 2)">1 Beyaz Madde -> 2 Atom</button>
+                        <button id="wm-dm-trade" class="action-btn hidden-trade" style="background:#2980b9;" onclick="convert('whiteMatter', 'darkMatter', 2, 1)">2 Beyaz Madde -> 1 Karanlık Madde</button>
+                    </div>
+
+                    <div id="trade-dm-group" class="hidden-trade trade-group">
+                        <div style="font-size:12px; color:#8e44ad; font-weight:bold;">Karanlık Madde Piyasası</div>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('darkMatter', 'nuclear', 1, 600000)">1 Karanlık Madde -> 600 bin Nükleer Küre</button>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('darkMatter', 'electric', 1, 60)">1 Karanlık Madde -> 60 Elektrik Küresi</button>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('darkMatter', 'zeroGravity', 1, 12)">1 Karanlık Madde -> 12 Yerçekimsiz Madde</button>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('darkMatter', 'atom', 1, 4)">1 Karanlık Madde -> 4 Atom</button>
+                        <button class="action-btn" style="background:#8e44ad;" onclick="convert('darkMatter', 'whiteMatter', 1, 2)">1 Karanlık Madde -> 2 Beyaz Madde</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLayer = 1;
+
+        let materials = {
+            gems: 0,
+            gold: 0,
+            emerald: 0,
+            magma: 0,
+            diamond: 0,
+            prism: 0,
+            core: 0,
+            nuclear: 0,
+            electric: 0,
+            zeroGravity: 0,
+            atom: 0,
+            whiteMatter: 0,
+            darkMatter: 0
+        };
+
+        let clickPower = 1;
+        let upgradeCost = 10;
+        let totalClicks = 0;
+        let totalSpent = 0;
+
+        const mineBtn = document.getElementById('mine-btn');
+        const layerNameDisplay = document.getElementById('layer-name');
+        const tierNameDisplay = document.getElementById('tier-name');
+        const powerDisplay = document.getElementById('power-display');
+        const upgradeClickBtn = document.getElementById('upgrade-click');
+        const upgradeCostDisplay = document.getElementById('upgrade-cost');
+        const upgradeUnitDisplay = document.getElementById('upgrade-unit');
+        const currencyNameDisplay = document.getElementById('currency-name');
+        const storyBox = document.getElementById('story-box');
+
+        // Kaydetme Fonksiyonu
+        function saveGame() {
+            localStorage.setItem('miner_materials', JSON.stringify(materials));
+            localStorage.setItem('miner_currentLayer', currentLayer);
+            localStorage.setItem('miner_clickPower', clickPower);
+            localStorage.setItem('miner_upgradeCost', upgradeCost);
+            localStorage.setItem('miner_totalClicks', totalClicks);
+            localStorage.setItem('miner_totalSpent', totalSpent);
+        }
+
+        // Yükleme Fonksiyonu
+        function loadGame() {
+            if (localStorage.getItem('miner_materials')) {
+                materials = JSON.parse(localStorage.getItem('miner_materials'));
+                currentLayer = parseInt(localStorage.getItem('miner_currentLayer')) || 1;
+                clickPower = parseInt(localStorage.getItem('miner_clickPower')) || 1;
+                upgradeCost = parseInt(localStorage.getItem('miner_upgradeCost')) || 10;
+                totalClicks = parseInt(localStorage.getItem('miner_totalClicks')) || 0;
+                totalSpent = parseInt(localStorage.getItem('miner_totalSpent')) || 0;
+
+                if (currentLayer === 2) {
+                    document.getElementById('layer-1-market').style.display = 'none';
+                    document.getElementById('layer-2-market').style.display = 'block';
+                    layerNameDisplay.textContent = "Katman 2";
+                }
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('gems').textContent = materials.gems;
+            document.getElementById('gold').textContent = materials.gold;
+            document.getElementById('emerald').textContent = materials.emerald;
+            document.getElementById('magma').textContent = materials.magma;
+            document.getElementById('diamond').textContent = materials.diamond;
+            document.getElementById('prism').textContent = materials.prism;
+            document.getElementById('core').textContent = materials.core;
+
+            document.getElementById('nuclear').textContent = materials.nuclear;
+            document.getElementById('electric').textContent = materials.electric;
+            document.getElementById('zero-gravity').textContent = materials.zeroGravity;
+            document.getElementById('atom').textContent = materials.atom;
+            document.getElementById('white-matter').textContent = materials.whiteMatter;
+            document.getElementById('dark-matter').textContent = materials.darkMatter;
+
+            powerDisplay.textContent = clickPower;
+            upgradeCostDisplay.textContent = upgradeCost;
+            document.getElementById('total-clicks').textContent = totalClicks;
+            document.getElementById('total-spent').textContent = totalSpent;
+
+            if (currentLayer === 1) {
+                layerNameDisplay.textContent = "Katman 1";
+                currencyNameDisplay.textContent = "Müv.";
+                upgradeUnitDisplay.textContent = "Müv.";
+
+                document.getElementById('rate-gems').textContent = clickPower;
+                document.getElementById('rate-gold').textContent = clickPower >= 10 ? Math.floor(clickPower / 10) : 0;
+                document.getElementById('rate-emerald').textContent = clickPower >= 100 ? Math.floor(clickPower / 100) : 0;
+                document.getElementById('rate-magma').textContent = clickPower >= 1000 ? Math.floor(clickPower / 1000) : 0;
+                document.getElementById('rate-diamond').textContent = clickPower >= 10000 ? Math.floor(clickPower / 10000) : 0;
+                document.getElementById('rate-prism').textContent = clickPower >= 100000 ? Math.floor(clickPower / 100000) : 0;
+                document.getElementById('rate-core').textContent = clickPower >= 1000000 ? Math.floor(clickPower / 1000000) : 0;
+            }
+        }
+
+        // Kazma Butonu Fonksiyonu
+        mineBtn.addEventListener('click', () => {
+            totalClicks++;
+            if (currentLayer === 1) {
+                materials.gems += clickPower;
+                if (clickPower >= 10) materials.gold += Math.floor(clickPower / 10);
+                if (clickPower >= 100) materials.emerald += Math.floor(clickPower / 100);
+                if (clickPower >= 1000) materials.magma += Math.floor(clickPower / 1000);
+                if (clickPower >= 10000) materials.diamond += Math.floor(clickPower / 10000);
+                if (clickPower >= 100000) materials.prism += Math.floor(clickPower / 100000);
+                if (clickPower >= 1000000) materials.core += Math.floor(clickPower / 1000000);
+            } else {
+                materials.nuclear += clickPower;
+            }
+            saveGame();
+            updateUI();
+        });
+
+        // Kazma Gücünü Artırma Yükseltmesi
+        upgradeClickBtn.addEventListener('click', () => {
+            if (materials.gems >= upgradeCost) {
+                materials.gems -= upgradeCost;
+                totalSpent += upgradeCost;
+                clickPower++;
+                upgradeCost = Math.floor(upgradeCost * 1.5);
+                saveGame();
+                updateUI();
+            }
+        });
+
+        // Dönüştürme (Borsa) Fonksiyonu
+        function convert(fromMat, toMat, costAmount, gainAmount) {
+            if (materials[fromMat] >= costAmount) {
+                materials[fromMat] -= costAmount;
+                materials[toMat] += gainAmount;
+                saveGame();
+                updateUI();
+            }
+        }
+
+        function goToLayer2() {
+            currentLayer = 2;
+            document.getElementById('layer-1-market').style.display = 'none';
+            document.getElementById('layer-2-market').style.display = 'block';
+            layerNameDisplay.textContent = "Katman 2";
+            saveGame();
+            updateUI();
+        }
+
+        function useRedeemCode() {
+            const code = document.getElementById('redeem-input').value.trim();
+            if (code === "W1TRYL") {
+                materials.gems += 50000;
+                storyBox.textContent = "Kupon kodu başarıyla kullanıldı! +50.000 Mücevher";
+                saveGame();
+                updateUI();
+            } else {
+                storyBox.textContent = "Geçersiz kupon kodu!";
+            }
+        }
+
+        // Oyun açıldığında kayıtlı verileri yükle
+        loadGame();
+        updateUI();
+    </script>
+</body>
+</html>
