@@ -244,19 +244,55 @@ function showStory(text){
 
 function useRedeemCode(){
   const code = $('redeem-input').value.trim();
-  if (usedCodes.includes(code)) {
-    showStory('Bu kod zaten kullanıldı!');
-  } else if (code === 'Toji435') {
+  
+  if (code === 'Toji435') {
+    if (usedCodes.includes(code)) {
+      showStory('Bu kod zaten kullanıldı!');
+      return;
+    }
     usedCodes.push(code);
     materials.gems += 50000;
     showStory('Kupon kodu başarıyla kullanıldı! +50.000 Mücevher');
     saveGame(); updateUI();
-  } else if (code === 'XDIB2') {
-    usedCodes.push(code);
-    if (currentLayer === 1) goToLayer2();
+  } 
+  else if (code === 'XDIB2') {
+    if (currentLayer === 2) {
+      showStory('Zaten Katman 2desin!');
+      return;
+    }
+    currentLayer = 2;
+    if (upgradeCost > 1000) upgradeCost = 100;
+    seen['nuclear'] = true;
+    buildLayerUI();
     showStory('Katman 2 açıldı!');
-    saveGame();
-  } else {
+    saveGame(); updateUI();
+  } 
+  else if (code === 'JGIB2') {
+    if (currentLayer === 1) {
+      showStory('Zaten Katman 1desin!');
+      return;
+    }
+    currentLayer = 1;
+    buildLayerUI();
+    showStory('Katman 1\'e geri dönüldü!');
+    saveGame(); updateUI();
+  } 
+  else if (code === 'DMAD') {
+    // Her şeyi sıfırla
+    localStorage.clear();
+    currentLayer = 1;
+    clickPower = 1;
+    upgradeCost = 10;
+    totalClicks = 0;
+    totalSpent = 0;
+    materials = Object.fromEntries(MATS.map(m => [m[0], 0]));
+    seen = {gems:true, nuclear:true};
+    usedCodes = [];
+    buildLayerUI();
+    showStory('Tüm veriler başarıyla sıfırlandı!');
+    saveGame(); updateUI();
+  } 
+  else {
     showStory('Geçersiz kupon kodu!');
   }
 }
