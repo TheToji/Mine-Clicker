@@ -82,8 +82,7 @@ button.action-btn:disabled{background-color:#4b4b52!important;color:#7c7c8a;curs
     </div>
   </div>
 </div>
-
-<script>
+  <script>
 // Malzemeler: [anahtar, emoji, isim, kısa isim, renk, katman]
 const MATS = [
   ['gems','💎','Mücevher','Müv.','#3498db',1],['gold','🪙','Altın','Altın','#d35400',1],
@@ -166,7 +165,7 @@ function buildLayerUI(){
     `<div class="trade-group" id="group-${k}">
       <div class="trade-title" style="color:${M[k].color}">${M[k].name} Piyasası</div>
       ${TRADES[k].map(([to,cost,gain]) =>
-        `<button class="action-btn" data-from="${k}" data-to="${to}" data-cost="${cost}" data-gain="${gain}" style="background:${M[k].color};color:#fff" onclick="convert('${k}','${to}',${cost},${gain})">${fmt(cost)} ${M[k].short} → ${fmt(gain)} ${M[to].short}</button>`).join('')}
+        `<button class="action-btn" data-from="${k}" data-to="${to}" data-cost="${cost}" data-gain="${gain}" style="background:${M[k].color};color:#fff" onclick="convert('${k}','${to}',${cost},${gain})">${fmt(cost)}${M[k].short} → ${fmt(gain)}${M[to].short}</button>`).join('')}
     </div>`).join('');
   $('layer-name').textContent = 'Katman ' + currentLayer;
   $('tier-name').textContent = M[baseOf(currentLayer)].name;
@@ -177,21 +176,22 @@ function updateUI(){
   const keys = keysOf(currentLayer);
   keys.forEach(k => {
     if (materials[k] > 0) seen[k] = true;
-    $('inv-' + k).textContent = fmt(materials[k]);
-    $('group-' + k).classList.toggle('hidden', !seen[k]);
+    const invEl = $('inv-' + k);
+    if (invEl) invEl.textContent = fmt(materials[k]);
+    const groupEl = $('group-' + k);
+    if (groupEl) groupEl.classList.toggle('hidden', !seen[k]);
     const rate = currentLayer === 1 ? Math.floor(clickPower / DIV[keys.indexOf(k)]) : (k === 'nuclear' ? clickPower : 0);
-    $('rate-' + k).textContent = fmt(rate);
+    const rateEl = $('rate-' + k);
+    if (rateEl) rateEl.textContent = fmt(rate);
   });
   document.querySelectorAll('#market button').forEach(b => {
     b.disabled = materials[b.dataset.from] < Number(b.dataset.cost);
   });
   const base = baseOf(currentLayer);
   $('power-display').textContent = fmt(clickPower);
-  $('upgrade-cost').textContent = fmt(upgradeCost);
-  $('upgrade-click').disabled = materials[base] < upgradeCost;
+  $('upgrade-cost').textContent = fmt(upgradeCost);$('upgrade-click').disabled = materials[base] < upgradeCost;
   $('total-clicks').textContent = fmt(totalClicks);
-  $('total-spent').textContent = fmt(totalSpent);
-  $('to-layer-2-btn').classList.toggle('hidden', !(currentLayer === 1 && materials.core >= 1));
+  $('total-spent').textContent = fmt(totalSpent);$('to-layer-2-btn').classList.toggle('hidden', !(currentLayer === 1 && materials.core >= 1));
 }
 
 $('mine-btn').addEventListener('click', () => {
@@ -225,7 +225,14 @@ function convert(from, to, cost, gain){
 
 function goToLayer2(){
   currentLayer = 2;
-  buildLayerUI(); saveGame(); updateUI();
+  // Katman 2'ye geçişte upgrade maliyetini sıfırdan dengeli başlatıyoruz
+  if (upgradeCost > 1000) {
+    upgradeCost = 100; 
+  }
+  seen['nuclear'] = true;
+  buildLayerUI(); 
+  saveGame(); 
+  updateUI();
 }
 
 let storyTimer;
@@ -257,7 +264,7 @@ function useRedeemCode(){
 loadGame();
 buildLayerUI();
 updateUI();
-</script> <!--
+</script>
  <button id="map-btn" onclick="location.href='map.html'">🗺️</button> -->
 </body>
 </html>
